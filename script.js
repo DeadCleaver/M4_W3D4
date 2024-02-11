@@ -1,24 +1,18 @@
 const booksapi = `https://striveschool-api.herokuapp.com/books`;
-
-/* fetch prova */
-/* fetch(booksapi)
-    .then((response) => response.json())
-    .then((json) => console.log(json))
-    .catch((err) => console.log("Error detected: ", err)); */
-
+let booksGallery = document.getElementById('books-gallery');
+    console.log(booksGallery);
+let booksArray = [];
 
 function getData() {
     fetch(booksapi)
         .then((response) => response.json())
         .then((json) => {
-            console.log(json);
-            const books = json;
-            console.log(books);
-            startingBooks(books);
+            booksArray = json;
+            startingBooks(booksArray);
+            console.log(booksArray);
         })
         .catch((err) => console.log("Error detected: ", err));
 };
-
 
 function startingBooks(books) {
     const booksGallery = document.getElementById(`books-gallery`);
@@ -30,11 +24,11 @@ function startingBooks(books) {
 }
 
 function displayBooks(books) {
-    const row = document.getElementById('book-row');
+    booksGallery.innerHTML = "";
 
     books.forEach(book => {
         const card = addBookCard(book);
-        row.appendChild(card);
+        booksGallery.appendChild(card);
     });
 }
 
@@ -95,14 +89,10 @@ function addBookCard({ asin, title, img, price, category }) {
 function addToCart(event) {
     let selectedBook = event.target.closest(".book-container")
     let cartBook = selectedBook.cloneNode(true);
-    console.log(selectedBook);
-    console.log(cartBook);
 
     let saveIcon = cartBook.querySelector(".save-button");
-    console.log(saveIcon);
     saveIcon.remove();
     let skipIcon = cartBook.querySelector(".skip-button");
-    console.log(skipIcon);
     skipIcon.remove();
 
     const cartGallery = document.getElementById("cart-gallery");
@@ -111,18 +101,40 @@ function addToCart(event) {
 
 
 function addBadge(event) {
-    let book = event.target.closest(".card")
-    book.classList.add("position-relative");
+    let bookCard = event.target.closest(".card")
+    bookCard.classList.add("position-relative");
 
     let badge = document.createElement("span");
     badge.classList.add("position-absolute", "top-0" ,"start-50", "translate-middle", "badge", "rounded-pill", "bg-warning");
     badge.innerText = "added";
 
-    book.appendChild(badge);
+    bookCard.appendChild(badge);
+};
+
+function filterBooks(event) {
+    let searchInput = event.target.value.toLowerCase();
+    let filteredBooks;
+
+    if (searchInput.length >= 4) {
+        filteredBooks = booksArray.filter(book => {
+            return book.title.toLowerCase().includes(searchInput);
+        });  
+        console.log(filteredBooks);
+        displayBooks(filteredBooks);
+    };
+};
+
+function clearGallery() {
+    const booksGallery = document.getElementById(`books-gallery`);
+    booksGallery.innerHTML = "";
 };
 
 window.onload = function () {
     getData();
+    const searchButton = document.getElementById(`search-button`);
+    const searchField = document.getElementById(`search-field`);
+    searchField.addEventListener(`keyup`, filterBooks);
+    
 };
 
 
